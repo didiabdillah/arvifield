@@ -14,8 +14,18 @@ class CreateResourcesTable extends Migration
     public function up()
     {
         Schema::create('resources', function (Blueprint $table) {
-            $table->id();
+            $table->string('resource_id', 64);
+            $table->string('resource_source_id', 64)->nullable();
+            $table->string('resource_category_id', 64)->nullable();
+            $table->string('resource_label');
+            $table->text('resource_desc')->nullable();
+            $table->text('resource_link');
+            $table->text('resource_preview');
+            $table->boolean('resource_active')->default(true);
             $table->timestamps();
+
+            $table->foreign('resource_category_id')->references('category_id')->on('categories')->onUpdate('cascade')->onDelete('set null');
+            $table->foreign('resource_source_id')->references('source_id')->on('sources')->onUpdate('cascade')->onDelete('set null');
         });
     }
 
@@ -26,6 +36,10 @@ class CreateResourcesTable extends Migration
      */
     public function down()
     {
+        Schema::table('resources', function (Blueprint $table) {
+            $table->dropForeign('resources_resource_category_id_foreign');
+            $table->dropForeign('resources_resource_source_id_foreign');
+        });
         Schema::dropIfExists('resources');
     }
 }
