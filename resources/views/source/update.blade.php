@@ -41,7 +41,7 @@
                         <input type="checkbox" class="form-check-input" id="active" name="active" @if($source->source_active){{'checked'}}@endif>
                         <label class="form-check-label" for="active">Active</label>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Insert</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-pencil"></i> Update</button>
                 </form>
 
             </div>

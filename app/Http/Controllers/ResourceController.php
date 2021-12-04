@@ -17,86 +17,48 @@ class ResourceController extends Controller
     // RESOURCE
     public function resource()
     {
-        // $resource = Resource::leftjoin('categories', 'resources.resource_category_id', '=', 'categories.category_id')
-        //     ->leftjoin('sources', 'resources.resource_source_id', '=', 'sources.source_id')
-        //     ->leftjoin('authors', 'resources.resource_author_id', '=', 'authors.author_id')
-        //     ->orderBy('resources.created_at', 'desc')->get();
+        $resource = Resource::leftjoin('categories', 'resources.resource_category_id', '=', 'categories.category_id')
+            ->leftjoin('sources', 'resources.resource_source_id', '=', 'sources.source_id')
+            ->orderBy('resources.created_at', 'desc')->get();
 
-        // $view_data = [
-        //     'resource' => $resource,
-        // ];
+        $view_data = [
+            'resource' => $resource,
+        ];
 
-        return view('resource.resource');
+        return view('resource.resource', $view_data);
     }
 
     public function create()
     {
-        // $source = Source::orderBy('source_label', 'asc')->get();
-        // $category = Category::orderBy('category_label', 'asc')->get();
+        $source = Source::orderBy('source_label', 'asc')->get();
+        $category = Category::orderBy('category_label', 'asc')->get();
 
-        // $view_data = [
-        //     'source' => $source,
-        //     'category' => $category,
-        // ];
+        $view_data = [
+            'source' => $source,
+            'category' => $category,
+        ];
 
-        return view('resource.create');
+        return view('resource.create', $view_data);
     }
 
     public function store(Request $request)
     {
-        // Input Validation
-        if ($request->file('file_preview') != NULL) {
-            $request->validate(
-                [
-                    'label'  => 'required|max:255',
-                    'files'  => 'required|array',
-                    'files.*'  => 'required|max:255',
-                    'files_raw'  => 'required|array',
-                    'files_raw.*'  => 'required|max:255',
-                    'files_version'  => 'required|array',
-                    'files_version.*'  => 'max:255',
-                    'files_origin_link'  => 'required|array',
-                    'files_origin_link.*'  => 'max:255',
-                    'file_preview'  => 'required|array',
-                    'file_preview.*'  => 'required|max:8000|mimes:jpg,jpeg,png,gif',
-                    'tag'  => 'required|array',
-                    'tag.*'  => 'required|max:255',
-                    'desc'  => 'max:65000',
-                ]
-            );
-        } else {
-            $request->validate(
-                [
-                    'label'  => 'required|max:255',
-                    'files'  => 'required|array',
-                    'files.*'  => 'required|max:255',
-                    'files_raw'  => 'required|array',
-                    'files_raw.*'  => 'required|max:255',
-                    'files_version'  => 'required|array',
-                    'files_version.*'  => 'max:255',
-                    'files_origin_link'  => 'required|array',
-                    'files_origin_link.*'  => 'max:255',
-                    'previews'  => 'required|array',
-                    'previews.*'  => 'required|max:255',
-                    'tag'  => 'required|array',
-                    'tag.*'  => 'required|max:255',
-                    'desc'  => 'max:65000',
-                ]
-            );
-        }
+        $request->validate(
+            [
+                'label'  => 'required|max:255',
+                'desc'  => 'max:65000',
+                'link'  => 'required|max:66666',
+                'preview'  => 'max:66666',
+            ]
+        );
 
         $label = htmlspecialchars($request->label);
         $source = htmlspecialchars($request->source);
-        $author = htmlspecialchars($request->author);
-        $tag = $request->tag;
-        $desc = $request->desc;
-        $files = $request->input('files');
-        $files_version = $request->input('files_version');
-        $files_raw = $request->input('files_raw');
-        $files_origin_link = $request->input('files_origin_link');
         $category = htmlspecialchars($request->category);
-        $previews = ($request->file('file_preview') != NULL) ? $request->file('file_preview') : $request->input('previews');
-
+        $desc = $request->desc;
+        $link = htmlspecialchars($request->link);
+        $preview = htmlspecialchars($request->preview);
+        $active = $request->active;
         $slug = Str::slug($label, '-');
 
         // Cek Slug
@@ -106,16 +68,38 @@ class ResourceController extends Controller
 
         $resource_id =  uniqid() . dechex(strtotime(now()));
 
+        // Link JSON String
+        $split_link = explode(";", $link);
+        $new_link = [];
+        foreach ($split_link as $data) {
+            $fetch_link = str_replace(" ", "", $data);
+            if ($fetch_link) {
+                $new_link[] = $fetch_link;
+            }
+        }
+        $json_link = json_encode($new_link, JSON_UNESCAPED_SLASHES);
+
+        // Preview JSON String
+        $split_preview = explode(";", $preview);
+        $new_preview = [];
+        foreach ($split_preview as $data) {
+            $fetch_preview = str_replace(" ", "", $data);
+            if ($fetch_preview) {
+                $new_preview[] = $fetch_preview;
+            }
+        }
+        $json_preview = json_encode($new_preview, JSON_UNESCAPED_SLASHES);
+
         $data = [
             'resource_id' => $resource_id,
-            'resource_category_id' => $category,
-            'resource_user_id' => Session::get('user_id'),
+            'resource_category_id' => ($category == "") ? NULL : $category,
             'resource_source_id' => ($source == "") ? NULL : $source,
-            'resource_author_id' => ($author == "") ? NULL : $author,
             'resource_label' => $label,
             'resource_slug' => $slug,
             'resource_desc' => $desc,
-            'resource_thumbnail' => "https://media.discordapp.net/attachments/889794209920471061/890216449870815252/image_1.jpg?width=925&height=473",
+            'resource_active' => ($active == 'on') ? true : false,
+            'resource_link' => "$json_link",
+            'resource_preview' => "$json_preview",
         ];
 
         //Insert Data
@@ -142,30 +126,27 @@ class ResourceController extends Controller
             'category' => $category,
         ];
 
-        return view('ADMIN.resource.edit', $view_data);
+        return view('resource.update', $view_data);
     }
 
     public function update(Request $request, $id)
     {
-        // Input Validation
         $request->validate(
             [
                 'label'  => 'required|max:255',
-                'tag'  => 'required',
                 'desc'  => 'max:65000',
-                'tag'  => 'required|array',
-                'tag.*'  => 'required|max:255',
+                'link'  => 'required|max:66666',
+                'preview'  => 'max:66666',
             ]
         );
 
         $label = htmlspecialchars($request->label);
-        $tag = $request->tag;
         $source = htmlspecialchars($request->source);
-        $author = htmlspecialchars($request->author);
-        $desc = $request->desc;
         $category = htmlspecialchars($request->category);
-        $change_slug = htmlspecialchars($request->change_slug);
-
+        $desc = $request->desc;
+        $link = htmlspecialchars($request->link);
+        $preview = htmlspecialchars($request->preview);
+        $active = $request->active;
         $slug = Str::slug($label, '-');
 
         // Cek Slug
@@ -173,30 +154,42 @@ class ResourceController extends Controller
             $slug = $slug . dechex(strtotime(now()));
         }
 
-        if ($change_slug != "") {
-            $data = [
-                'resource_category_id' => $category,
-                'resource_source_id' => ($source == "") ? NULL : $source,
-                'resource_author_id' => ($author == "") ? NULL : $author,
-                'resource_label' => $label,
-                'resource_slug' => $slug,
-                'resource_desc' => $desc,
-            ];
-
-            //Update Data
-            Resource::where('resource_id', $id)->update($data);
-        } else {
-            $data = [
-                'resource_category_id' => $category,
-                'resource_source_id' => ($source == "") ? NULL : $source,
-                'resource_author_id' => ($author == "") ? NULL : $author,
-                'resource_label' => $label,
-                'resource_desc' => $desc,
-            ];
-
-            //Update Data
-            Resource::where('resource_id', $id)->update($data);
+        // Link JSON String
+        $split_link = explode(";", $link);
+        $new_link = [];
+        foreach ($split_link as $data) {
+            $fetch_link = str_replace(" ", "", $data);
+            if ($fetch_link) {
+                $new_link[] = $fetch_link;
+            }
         }
+        $json_link = json_encode($new_link, JSON_UNESCAPED_SLASHES);
+
+        // Preview JSON String
+        $split_preview = explode(";", $preview);
+        $new_preview = [];
+        foreach ($split_preview as $data) {
+            $fetch_preview = str_replace(" ", "", $data);
+            if ($fetch_preview) {
+                $new_preview[] = $fetch_preview;
+            }
+        }
+        $json_preview = json_encode($new_preview, JSON_UNESCAPED_SLASHES);
+
+        $data = [
+            'resource_category_id' => $category,
+            'resource_category_id' => ($category == "") ? NULL : $category,
+            'resource_source_id' => ($source == "") ? NULL : $source,
+            'resource_label' => $label,
+            'resource_slug' => $slug,
+            'resource_desc' => $desc,
+            'resource_active' => ($active == 'on') ? true : false,
+            'resource_link' => "$json_link",
+            'resource_preview' => "$json_preview",
+        ];
+
+        //Update Data
+        Resource::where('resource_id', $id)->update($data);
 
         //Flash Message
         flash_alert(

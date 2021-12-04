@@ -16,21 +16,77 @@
 
             </div>
             <div class="card-body">
-                <form>
+                <form action="{{route('resource_store')}}" method="POST">
+                    @csrf
                     <div class="form-group">
-                        <label for="exampleInputEmail1">Email address</label>
-                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-                        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                        <label for="label">Label</label>
+                        <input type="text" class="form-control @error('label') is-invalid @enderror" id="label" name="label" placeholder="Enter Label" value="{{old('label')}}">
+                        @error('label')
+                        <div class="invalid-feedback">
+                            {{$message}}
+                        </div>
+                        @enderror
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputPassword1">Password</label>
-                        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                        <label for="desc">Description</label>
+                        <textarea class="form-control @error('desc') is-invalid @enderror" id="desc" name="desc" placeholder="Description">{{old('desc')}}</textarea>
+                        @error('desc')
+                        <div class=" invalid-feedback">
+                            {{$message}}
+                        </div>
+                        @enderror
                     </div>
-                    <div class="form-check mb-2">
-                        <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                        <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                    <div class="form-group">
+                        <label for="source">Source</label>
+                        <select class="form-control select2-source @error('source') is-invalid @enderror" style="width: 100%;" name="source" id="source">
+                            <option value="">--Select Source--</option>
+                            @foreach($source as $data)
+                            <option value="{{$data->source_id}}" @if(old('source')==$data->source_id){{'selected'}}@endif>{{$data->source_label}}</option>
+                            @endforeach
+                        </select>
+                        @error('source')
+                        <div class="invalid-feedback">
+                            Pilih Source
+                        </div>
+                        @enderror
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control select2-category @error('category') is-invalid @enderror" style="width: 100%;" name="category" id="category">
+                            <option value="">--Select Category--</option>
+                            @foreach($category as $data)
+                            <option value="{{$data->category_id}}" @if(old('category')==$data->category_id){{'selected'}}@endif>{{$data->category_label}}</option>
+                            @endforeach
+                        </select>
+                        @error('category')
+                        <div class="invalid-feedback">
+                            Pilih Category
+                        </div>
+                        @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="link">Link</label>
+                        <textarea class="form-control @error('link') is-invalid @enderror" id="link" name="link" placeholder="Enter Link">{{old('link')}}</textarea>
+                        @error('link')
+                        <div class="invalid-feedback">
+                            {{$message}}
+                        </div>
+                        @enderror
+                    </div>
+                    <div class="form-group">
+                        <label for="preview">Preview</label>
+                        <textarea class="form-control @error('preview') is-invalid @enderror" id="preview" name="preview" placeholder="Enter Preview">{{old('preview')}}</textarea>
+                        @error('preview')
+                        <div class="invalid-feedback">
+                            {{$message}}
+                        </div>
+                        @enderror
+                    </div>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="active" name="active" @if(old('active')){{'checked'}}@endif>
+                        <label class="form-check-label" for="active">Active</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Insert</button>
                 </form>
 
             </div>
@@ -38,3 +94,16 @@
     </div>
 </div>
 @endsection
+
+@push('plugin')
+<!-- Select2 -->
+<script src="{{URL::asset('assets/js/select2/js/select2.full.min.js')}}"></script>
+
+<script>
+    $(function() {
+        //Initialize Select2 Elements
+        $('.select2-category').select2()
+        $('.select2-source').select2()
+    });
+</script>
+@endpush

@@ -18,10 +18,10 @@ class CreateResourcesTable extends Migration
             $table->string('resource_source_id', 64)->nullable();
             $table->string('resource_category_id', 64)->nullable();
             $table->string('resource_label');
-            $table->string('resource_slug');
+            $table->string('resource_slug')->unique();
             $table->text('resource_desc')->nullable();
-            $table->text('resource_link');
-            $table->text('resource_preview');
+            $table->mediumText('resource_link');
+            $table->mediumText('resource_preview');
             $table->boolean('resource_active')->default(true);
             $table->timestamps();
 
