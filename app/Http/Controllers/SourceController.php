@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 use App\Models\Source;
 
@@ -11,13 +12,13 @@ class SourceController extends Controller
 {
     public function index()
     {
-        // $source = Source::orderBy('source_label', 'asc')->get();
+        $source = Source::orderBy('source_label', 'asc')->get();
 
-        // $view_data = [
-        //     'source' => $source,
-        // ];
+        $view_data = [
+            'source' => $source,
+        ];
 
-        return view('source.source');
+        return view('source.source', $view_data);
     }
 
     public function create()
@@ -37,6 +38,8 @@ class SourceController extends Controller
 
         $label = htmlspecialchars($request->label);
         $link = htmlspecialchars($request->link);
+        $slug = Str::slug($label, '-');
+        $active = $request->active;
 
         //check is source exist in DB
         if (Source::where('source_label', htmlspecialchars($label))->count() > 0) {
@@ -48,7 +51,12 @@ class SourceController extends Controller
                 'Source Already Exist' //Sub Alert Message
             );
 
-            return redirect()->route('admin_source_create');
+            return redirect()->route('source_create');
+        }
+
+        // Cek Slug
+        if (Source::where('source_slug', $slug)->count() > 0) {
+            $slug = $slug . dechex(strtotime(now()));
         }
 
         $source_id =  uniqid() . dechex(strtotime(now()));
@@ -57,6 +65,8 @@ class SourceController extends Controller
             'source_id' => $source_id,
             'source_label' => $label,
             'source_link' => $link,
+            'source_slug' => $slug,
+            'source_active' => ($active == 'on') ? true : false,
         ];
 
         //Insert Data
@@ -69,7 +79,7 @@ class SourceController extends Controller
             'Source Added' //Sub Alert Message
         );
 
-        return redirect()->route('admin_source');
+        return redirect()->route('source');
     }
 
     public function edit($id)
@@ -80,7 +90,7 @@ class SourceController extends Controller
             'source' => $source,
         ];
 
-        return view('ADMIN.source.edit', $view_data);
+        return view('source.update', $view_data);
     }
 
     public function update(Request $request, $id)
@@ -95,6 +105,8 @@ class SourceController extends Controller
 
         $label = htmlspecialchars($request->label);
         $link = htmlspecialchars($request->link);
+        $slug = Str::slug($label, '-');
+        $active = $request->active;
 
         //check is source exist in DB
         if (Source::where('source_label', htmlspecialchars($label))->where('source_id', '!=', $id)->count() > 0) {
@@ -106,12 +118,19 @@ class SourceController extends Controller
                 'Source Already Exist' //Sub Alert Message
             );
 
-            return redirect()->route('admin_source_edit', $id);
+            return redirect()->route('source_edit', $id);
+        }
+
+        // Cek Slug
+        if (Source::where('source_slug', $slug)->count() > 0) {
+            $slug = $slug . dechex(strtotime(now()));
         }
 
         $data = [
             'source_label' => $label,
             'source_link' => $link,
+            'source_slug' => $slug,
+            'source_active' => ($active == 'on') ? true : false,
         ];
 
         //Update Data
@@ -124,7 +143,7 @@ class SourceController extends Controller
             'Source Updated' //Sub Alert Message
         );
 
-        return redirect()->route('admin_source');
+        return redirect()->route('source');
     }
 
     public function destroy($id)
@@ -138,6 +157,6 @@ class SourceController extends Controller
             'Source Deleted' //Sub Alert Message
         );
 
-        return redirect()->route('admin_source');
+        return redirect()->route('source');
     }
 }

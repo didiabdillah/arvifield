@@ -107,7 +107,7 @@ class CategoryController extends Controller
                 'Category Already Exist' //Sub Alert Message
             );
 
-            return redirect()->route('admin_category_edit', $id);
+            return redirect()->route('category_edit', $id);
         }
 
         $data = [

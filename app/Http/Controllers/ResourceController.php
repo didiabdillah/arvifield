@@ -127,7 +127,7 @@ class ResourceController extends Controller
             'Success', //Alert Message 
             'Resource Added' //Sub Alert Message
         );
-        return redirect()->route('admin_resource');
+        return redirect()->route('resource');
     }
 
     public function edit($id)
@@ -205,7 +205,7 @@ class ResourceController extends Controller
             'Resource Updated' //Sub Alert Message
         );
 
-        return redirect()->route('admin_resource');
+        return redirect()->route('resource');
     }
 
     public function destroy($id)
@@ -219,7 +219,7 @@ class ResourceController extends Controller
             'Resource Deleted' //Sub Alert Message
         );
 
-        return redirect()->route('admin_resource');
+        return redirect()->route('resource');
     }
 
     // END RESOURCE
