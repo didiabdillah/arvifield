@@ -14,8 +14,9 @@ class CreateSourcesTable extends Migration
     public function up()
     {
         Schema::create('sources', function (Blueprint $table) {
-            $table->string('source_id', 64);
+            $table->string('source_id', 64)->unique();
             $table->string('source_label');
+            $table->string('source_slug');
             $table->string('source_link')->nullable();
             $table->boolean('source_active')->default(true);
             $table->timestamps();

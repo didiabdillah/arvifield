@@ -13,6 +13,7 @@ class Category extends Model
     protected $fillable = [
         'category_id',
         'category_label',
+        'category_slug',
     ];
 
     public function resource()

@@ -12,6 +12,7 @@ class Source extends Model
     protected $fillable = [
         'source_id',
         'source_label',
+        'source_slug',
         'source_link',
         'source_active',
     ];

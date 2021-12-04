@@ -14,6 +14,7 @@ class Resource extends Model
         'resource_category_id',
         'resource_source_id',
         'resource_label',
+        'resource_slug',
         'resource_desc',
         'resource_link',
         'resource_preview',
